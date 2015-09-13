@@ -45,7 +45,63 @@ public class MeshConverter {
 	public static MeshData convertToVertexNormals(ArrayList<Vector3> positions, ArrayList<Vector3i> tris) {
 		MeshData data = new MeshData();
 
-		// TODO#A1 SOLUTION START
+		System.out.println(positions.size());
+		System.out.println(tris.size());
+		data.vertexCount=positions.size();
+		data.indexCount=tris.size()*3;
+		
+		data.positions = NativeMem.createFloatBuffer(data.vertexCount * 3);
+		data.normals = NativeMem.createFloatBuffer(data.vertexCount * 3);
+		data.indices = NativeMem.createIntBuffer(data.indexCount);
+		
+		for(int i=0;i<positions.size();i++){
+			data.positions.put(positions.get(i).x);
+			data.positions.put(positions.get(i).y);
+			data.positions.put(positions.get(i).z);
+		}
+		
+		for(int i=0;i<tris.size();i++){
+			data.indices.put(tris.get(i).x);
+			data.indices.put(tris.get(i).y);
+			data.indices.put(tris.get(i).z);
+		}
+		
+		ArrayList<Vector3> normalarray = new ArrayList<Vector3>();
+		for(int i=0;i<positions.size();++i){
+			Vector3 normalvector=new Vector3();
+			normalvector.setZero();
+			normalarray.add(normalvector);
+		}
+
+		for(int i=0;i<tris.size();++i){
+			Vector3 X=new Vector3(positions.get(tris.get(i).x));
+			Vector3 Y=new Vector3(positions.get(tris.get(i).y));
+			Vector3 Z=new Vector3(positions.get(tris.get(i).z));
+			
+			
+			Vector3 XY=new Vector3(Y.sub(X));
+			Vector3 XZ=new Vector3(Z.sub(X));
+			
+			Vector3 normal=new Vector3(XY.cross(XZ));
+			
+			//System.out.println(normal.x);
+			Vector3 X1=normalarray.get(tris.get(i).x);
+			Vector3 Y1=normalarray.get(tris.get(i).y);
+			Vector3 Z1=normalarray.get(tris.get(i).z);
+			
+			X1.add(normal);
+			Y1.add(normal);
+			Z1.add(normal);
+		}
+		
+		for(int i=0;i<positions.size();++i){
+			Vector3 normalvector=new Vector3();
+			normalvector=normalarray.get(i);
+			normalvector.normalize();
+			data.normals.put(normalvector.x);
+			data.normals.put(normalvector.y);
+			data.normals.put(normalvector.z);
+		}
 		
 		// #SOLUTION END
 		
